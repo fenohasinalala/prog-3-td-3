@@ -1,5 +1,6 @@
 package app.foot.repository.mapper;
 
+import app.foot.controller.rest.CreatePlayerScorer;
 import app.foot.model.Player;
 import app.foot.model.PlayerScorer;
 import app.foot.repository.entity.PlayerEntity;
@@ -22,6 +23,14 @@ public class PlayerMapper {
                 .player(toDomain(entity.getPlayer()))
                 .minute(entity.getMinute())
                 .isOwnGoal(entity.isOwnGoal())
+                .build();
+    }
+
+    public PlayerScorer toDomain(CreatePlayerScorer entity) {
+        return PlayerScorer.builder()
+                .player(entity.getPlayer())
+                .minute(entity.getScoreTime())
+                .isOwnGoal(entity.getIsOG())
                 .build();
     }
 }

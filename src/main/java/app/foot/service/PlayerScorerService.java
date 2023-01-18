@@ -31,7 +31,7 @@ public class PlayerScorerService {
     public Match addGoals(int id,List<PlayerScorer> playerScorers) {
         List<PlayerScoreEntity> toSave = new ArrayList<>();
         MatchEntity matchEntity = matchService.getMatchById(id);
-        validator.accept(playerScorers);
+
         for (PlayerScorer p: playerScorers) {
             PlayerScoreEntity goal = new PlayerScoreEntity();
             PlayerEntity player = playerService.getPlayerById(p.getPlayer().getId());
@@ -41,6 +41,7 @@ public class PlayerScorerService {
             if(!p.getPlayer().equals(playerMapper.toDomain(player))){
                 throw new BadRequestException("Player with Id "+player.getId()+" is not the same as the player in DB");
             }
+            validator.accept(p);
             goal.setPlayer(player);
             goal.setOwnGoal(p.getIsOwnGoal());
             goal.setMinute(p.getMinute());
