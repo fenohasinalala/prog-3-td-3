@@ -38,9 +38,9 @@ public class PlayerScorerService {
             if (!player.getTeam().getId().equals(matchEntity.getTeamA().getId()) && !player.getTeam().getId().equals(matchEntity.getTeamB().getId())){
                 throw new BadRequestException("Player with Id "+player.getId()+" is not in teamA or in teamB ");
             }
-            /*if (!p.getPlayer().equals(playerMapper.toDomain(player))){
+            if(!p.getPlayer().equals(playerMapper.toDomain(player))){
                 throw new BadRequestException("Player with Id "+player.getId()+" is not the same as the player in DB");
-            }*/
+            }
             goal.setPlayer(player);
             goal.setOwnGoal(p.getIsOwnGoal());
             goal.setMinute(p.getMinute());
