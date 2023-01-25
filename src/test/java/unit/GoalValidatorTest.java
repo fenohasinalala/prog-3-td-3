@@ -3,6 +3,11 @@ package unit;
 import app.foot.controller.validator.GoalValidator;
 import app.foot.exception.BadRequestException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,6 +15,11 @@ import static utils.TestUtils.*;
 
 public class GoalValidatorTest {
     GoalValidator subject = new GoalValidator();
+
+    public static void assertThrowsRuntimeException(String MessageError, Executable executable) {
+        RuntimeException Exception = assertThrows(RuntimeException.class, executable);
+        assertEquals(MessageError, Exception.getMessage());
+    }
 
     @Test
     void accept_ok() {
