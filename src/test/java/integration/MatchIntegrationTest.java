@@ -86,6 +86,7 @@ class MatchIntegrationTest {
                 .id(6)
                 .name("J6")
                 .isGuardian(false)
+                .teamName("E3")
                 .build();
     }
 
@@ -94,6 +95,7 @@ class MatchIntegrationTest {
                 .id(3)
                 .name("J3")
                 .isGuardian(false)
+                .teamName("E2")
                 .build();
     }
 
