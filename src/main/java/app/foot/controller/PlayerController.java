@@ -1,7 +1,9 @@
 package app.foot.controller;
 
+import app.foot.controller.rest.ModifyPlayer;
 import app.foot.controller.rest.Player;
 import app.foot.controller.rest.mapper.PlayerRestMapper;
+import app.foot.controller.validator.ModifyPlayerValidator;
 import app.foot.service.PlayerService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class PlayerController {
     private final PlayerRestMapper mapper;
     private final PlayerService service;
+    private final ModifyPlayerValidator modifyPlayerValidator;
 
     @GetMapping("/players")
     public List<Player> getPlayers() {
@@ -40,7 +43,10 @@ public class PlayerController {
     // Don't forget to add integration tests for this
 
     @PutMapping("/players")
-    public List<Player> modifyPlayers(@RequestBody List<Player> toModify) {
+    public List<Player> modifyPlayers(@RequestBody List<ModifyPlayer> toModify) {
+        for (ModifyPlayer m:toModify) {
+            modifyPlayerValidator.accept(m);
+        }
         List<app.foot.model.Player> domain = toModify.stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toUnmodifiableList());

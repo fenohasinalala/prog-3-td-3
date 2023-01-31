@@ -4,6 +4,7 @@ import app.foot.exception.BadRequestException;
 import app.foot.exception.NotFoundException;
 import app.foot.model.Player;
 import app.foot.repository.PlayerRepository;
+import app.foot.repository.entity.PlayerEntity;
 import app.foot.repository.mapper.PlayerMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -35,23 +36,10 @@ public class PlayerService {
 
     @Transactional
     public List<Player> modifyPlayers(List<Player> players) {
-        StringBuilder exceptionBuilder = new StringBuilder();
-        for (Player p: players) {
-            if (p.getId()!=null ){
-                if (repository.findById(p.getId()).isEmpty()) {
-                    exceptionBuilder.append("Player#").append(p.getId()).append(" not found");
-                }
-                if (p.getName().length()<1 || p.getName()==null){
-                    exceptionBuilder.append("Name is mandatory");
-                }
-                if (p.getTeamName()!=null){
-                    exceptionBuilder.append("teamName should not be specified");
-                }
-            }else exceptionBuilder.append("Valid Player Id must be specified");
-
-        }
-        if (exceptionBuilder.isEmpty()){
-            throw new BadRequestException(exceptionBuilder.toString());
+        for (Player p:players
+             ) {
+            PlayerEntity playerEntity = repository.findById(p.getId()).orElseThrow(()->new NotFoundException("Player#"+p.getId()+" not found"));
+            p.setTeamName(playerEntity.getTeam().getName());
         }
         return repository.saveAll(players.stream()
                         .map(mapper::toEntity)

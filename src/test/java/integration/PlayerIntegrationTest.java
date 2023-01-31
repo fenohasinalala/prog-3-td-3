@@ -1,6 +1,7 @@
 package integration;
 
 import app.foot.FootApi;
+import app.foot.controller.rest.ModifyPlayer;
 import app.foot.controller.rest.Player;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static utils.TestUtils.assertThrowsServletExceptionMessage;
+import static utils.TestUtils.scorer6;
 
 @SpringBootTest(classes = FootApi.class)
 @AutoConfigureMockMvc
@@ -94,7 +97,7 @@ class PlayerIntegrationTest {
 
     @Test
     void modify_players_ok() throws Exception {
-        Player toModify = Player.builder()
+        ModifyPlayer toModify = ModifyPlayer.builder()
                 .id(5)
                 .name("J5modified")
                 .isGuardian(false)
@@ -107,10 +110,78 @@ class PlayerIntegrationTest {
                 .andReturn()
                 .getResponse();
         List<Player> actual = convertFromHttpResponse(response);
+        Player expected = Player.builder()
+                .id(toModify.getId())
+                .name(toModify.getName())
+                .isGuardian(toModify.getIsGuardian())
+                .teamName(actual.get(0).getTeamName()).build();
 
         assertEquals(1, actual.size());
-        assertEquals(toModify, actual.get(0));
+        assertEquals(expected, actual.get(0));
     }
+
+    @Test
+    void modify_players_name_mandatory_ko() throws Exception {
+        ModifyPlayer toModify = ModifyPlayer.builder()
+                .id(5)
+                .name("")
+                .isGuardian(false)
+                .build();
+
+        String errorMessage = "400 BAD_REQUEST : Name is mandatory";
+
+        assertThrowsServletExceptionMessage(errorMessage,
+                () ->  mockMvc
+                        .perform(put("/players")
+                                .content(objectMapper.writeValueAsString(List.of(toModify)))
+                                .contentType("application/json")
+                                .accept("application/json")));
+        assertThrowsServletExceptionMessage(errorMessage,
+                () ->  mockMvc
+                        .perform(put("/players")
+                                .content(objectMapper.writeValueAsString(List.of(toModify.toBuilder().name(null).build())))
+                                .contentType("application/json")
+                                .accept("application/json")));
+    }
+
+    @Test
+    void modify_players_id_null_ko() throws Exception {
+        ModifyPlayer toModify = ModifyPlayer.builder()
+                .id(null)
+                .name("J5modified")
+                .isGuardian(false)
+                .build();
+
+        String errorMessage = "400 BAD_REQUEST : Valid Player Id must be specified";
+
+        assertThrowsServletExceptionMessage(errorMessage,
+                () ->  mockMvc
+                        .perform(put("/players")
+                                .content(objectMapper.writeValueAsString(List.of(toModify)))
+                                .contentType("application/json")
+                                .accept("application/json")));
+    }
+
+    @Test
+    void modify_players_id_not_found_ko() throws Exception {
+        int id = 1000;
+        ModifyPlayer toModify = ModifyPlayer.builder()
+                .id(id)
+                .name("J5modified")
+                .isGuardian(false)
+                .build();
+
+        String errorMessage = "404 NOT_FOUND : Player#"+id+" not found";
+
+        assertThrowsServletExceptionMessage(errorMessage,
+                () ->  mockMvc
+                        .perform(put("/players")
+                                .content(objectMapper.writeValueAsString(List.of(toModify)))
+                                .contentType("application/json")
+                                .accept("application/json")));
+    }
+
+
 
     private List<Player> convertFromHttpResponse(MockHttpServletResponse response)
             throws JsonProcessingException, UnsupportedEncodingException {
