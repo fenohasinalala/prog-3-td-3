@@ -8,6 +8,7 @@ import app.foot.repository.entity.MatchEntity;
 import app.foot.repository.entity.PlayerEntity;
 import app.foot.repository.entity.PlayerScoreEntity;
 import app.foot.repository.mapper.PlayerMapper;
+import app.foot.service.TeamService;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -23,7 +24,10 @@ public class PlayerMapperTest {
     public static final int MATCH_ID = 1;
     MatchRepository matchRepositoryMock = mock(MatchRepository.class);
     PlayerRepository playerRepositoryMock = mock(PlayerRepository.class);
-    PlayerMapper subject = new PlayerMapper(matchRepositoryMock, playerRepositoryMock);
+
+    TeamService teamServiceMock = mock(TeamService.class);
+
+    PlayerMapper subject = new PlayerMapper(matchRepositoryMock, playerRepositoryMock, teamServiceMock);
 
     private static PlayerEntity entityRakoto() {
         return playerEntityRakoto(teamBarea());

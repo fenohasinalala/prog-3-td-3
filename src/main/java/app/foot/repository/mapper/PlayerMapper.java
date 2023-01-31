@@ -6,6 +6,7 @@ import app.foot.repository.MatchRepository;
 import app.foot.repository.PlayerRepository;
 import app.foot.repository.entity.PlayerEntity;
 import app.foot.repository.entity.PlayerScoreEntity;
+import app.foot.service.TeamService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class PlayerMapper {
   private final MatchRepository matchRepository;
   private final PlayerRepository playerRepository;
+ private final TeamService teamService;
 
 
   public Player toDomain(PlayerEntity entity) {
@@ -23,6 +25,15 @@ public class PlayerMapper {
         .isGuardian(entity.isGuardian())
         .teamName(entity.getTeam().getName())
         .build();
+  }
+
+  public PlayerEntity toEntity(Player player) {
+    return PlayerEntity.builder()
+            .id(player.getId())
+            .name(player.getName())
+            .guardian(player.getIsGuardian())
+            .team(teamService.getTeamEntityByName(player.getTeamName()))
+            .build();
   }
 
   public PlayerScorer toDomain(PlayerScoreEntity entity) {
