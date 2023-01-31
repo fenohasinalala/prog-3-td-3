@@ -1,7 +1,6 @@
 package integration;
 
 import app.foot.FootApi;
-import app.foot.controller.rest.Match;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

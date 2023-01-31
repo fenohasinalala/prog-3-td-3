@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 @SpringBootTest(classes = FootApi.class)
 @AutoConfigureMockMvc
@@ -33,6 +34,7 @@ class PlayerIntegrationTest {
                 .id(1)
                 .name("J1")
                 .isGuardian(false)
+                .teamName("E1")
                 .build();
     }
 
@@ -41,6 +43,7 @@ class PlayerIntegrationTest {
                 .id(2)
                 .name("J2")
                 .isGuardian(false)
+                .teamName("E1")
                 .build();
     }
 
@@ -49,6 +52,7 @@ class PlayerIntegrationTest {
                 .id(3)
                 .name("J3")
                 .isGuardian(false)
+                .teamName("E2")
                 .build();
     }
 
@@ -86,6 +90,26 @@ class PlayerIntegrationTest {
 
         assertEquals(1, actual.size());
         assertEquals(toCreate, actual.get(0).toBuilder().id(null).build());
+    }
+
+    @Test
+    void modify_players_ok() throws Exception {
+        Player toModify = Player.builder()
+                .id(5)
+                .name("J5modified")
+                .isGuardian(false)
+                .build();
+        MockHttpServletResponse response = mockMvc
+                .perform(put("/players")
+                        .content(objectMapper.writeValueAsString(List.of(toModify)))
+                        .contentType("application/json")
+                        .accept("application/json"))
+                .andReturn()
+                .getResponse();
+        List<Player> actual = convertFromHttpResponse(response);
+
+        assertEquals(1, actual.size());
+        assertEquals(toModify, actual.get(0));
     }
 
     private List<Player> convertFromHttpResponse(MockHttpServletResponse response)

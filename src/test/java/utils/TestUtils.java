@@ -6,6 +6,7 @@ import app.foot.model.Team;
 import app.foot.repository.entity.PlayerEntity;
 import app.foot.repository.entity.PlayerScoreEntity;
 import app.foot.repository.entity.TeamEntity;
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.function.Executable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,6 +19,14 @@ public class TestUtils {
                 .player(player1())
                 .isOG(false)
                 .scoreTime(10)
+                .build();
+    }
+
+    public static PlayerScorer scorer6() {
+        return PlayerScorer.builder()
+                .player(player1().toBuilder().id(6).name("J6").teamName("E3").isGuardian(false).build())
+                .isOG(false)
+                .scoreTime(70)
                 .build();
     }
 
@@ -101,4 +110,11 @@ public class TestUtils {
         Throwable exception = assertThrows(exceptionClass, executable);
         assertEquals(message, exception.getMessage());
     }
+
+    public static void assertThrowsServletExceptionMessage(String message, Executable executable) {
+        ServletException exception = assertThrows(ServletException.class, executable);
+        assertEquals(message, exception.getCause().getMessage());
+    }
+
+
 }

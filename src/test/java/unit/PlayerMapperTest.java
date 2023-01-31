@@ -1,5 +1,6 @@
 package unit;
 
+import app.foot.exception.NotFoundException;
 import app.foot.model.Player;
 import app.foot.model.PlayerScorer;
 import app.foot.repository.MatchRepository;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static utils.TestUtils.*;
@@ -51,6 +53,41 @@ public class PlayerMapperTest {
         Player actual = subject.toDomain(entity);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void player_to_entity_ok() {
+        Player player = Player
+                .builder()
+                .id(1)
+                .name("Rakoto")
+                .isGuardian(false)
+                .teamName("Barea")
+                .build();
+
+        when(teamRepositoryMock.findByName("Barea"))
+                .thenReturn(Optional.ofNullable(teamBarea()));
+
+        PlayerEntity expected = entityRakoto();
+
+        PlayerEntity actual = subject.toEntity(player);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void player_to_entity_ko() {
+        Player player = Player
+                .builder()
+                .id(1)
+                .name("Rakoto")
+                .isGuardian(false)
+                .teamName("tanana")
+                .build();
+
+        when(teamRepositoryMock.findByName("tanana")).thenThrow(new NotFoundException("Team#"+player.getTeamName()+" not found"));
+
+        assertThrowsExceptionMessage("404 NOT_FOUND : Team#tanana not found", NotFoundException.class, () -> subject.toEntity(player));
     }
 
     @Test
