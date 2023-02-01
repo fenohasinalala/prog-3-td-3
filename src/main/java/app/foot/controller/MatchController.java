@@ -38,5 +38,6 @@ public class MatchController {
                 .map(scorerMapper::toDomain)
                 .toList();
         return mapper.toRest(service.addGoals(matchId, scorerList));
+
     }
 }

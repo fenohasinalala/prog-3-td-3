@@ -1,6 +1,7 @@
 package integration;
 
 import app.foot.FootApi;
+import app.foot.controller.rest.ModifyPlayer;
 import app.foot.controller.rest.Player;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static utils.TestUtils.assertThrowsServletExceptionMessage;
+import static utils.TestUtils.scorer6;
 
 @SpringBootTest(classes = FootApi.class)
 @AutoConfigureMockMvc
@@ -33,6 +38,7 @@ class PlayerIntegrationTest {
                 .id(1)
                 .name("J1")
                 .isGuardian(false)
+                .teamName("E1")
                 .build();
     }
 
@@ -41,6 +47,7 @@ class PlayerIntegrationTest {
                 .id(2)
                 .name("J2")
                 .isGuardian(false)
+                .teamName("E1")
                 .build();
     }
 
@@ -49,6 +56,7 @@ class PlayerIntegrationTest {
                 .id(3)
                 .name("J3")
                 .isGuardian(false)
+                .teamName("E2")
                 .build();
     }
 
@@ -61,7 +69,7 @@ class PlayerIntegrationTest {
         List<Player> actual = convertFromHttpResponse(response);
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertEquals(9, actual.size());
+        assertEquals(10, actual.size());
         assertTrue(actual.containsAll(List.of(
                 player1(),
                 player2(),
@@ -87,6 +95,98 @@ class PlayerIntegrationTest {
         assertEquals(1, actual.size());
         assertEquals(toCreate, actual.get(0).toBuilder().id(null).build());
     }
+
+    @Test
+    void modify_players_ok() throws Exception {
+        ModifyPlayer toModify = ModifyPlayer.builder()
+                .id(5)
+                .name("J5modified")
+                .isGuardian(false)
+                .build();
+        MockHttpServletResponse response = mockMvc
+                .perform(put("/players")
+                        .content(objectMapper.writeValueAsString(List.of(toModify)))
+                        .contentType("application/json")
+                        .accept("application/json"))
+                .andReturn()
+                .getResponse();
+        List<Player> actual = convertFromHttpResponse(response);
+        Player expected = Player.builder()
+                .id(toModify.getId())
+                .name(toModify.getName())
+                .isGuardian(toModify.getIsGuardian())
+                .teamName(actual.get(0).getTeamName()).build();
+
+        assertEquals(1, actual.size());
+        assertEquals(expected, actual.get(0));
+    }
+
+    @Test
+    void modify_players_name_mandatory_ko() throws Exception {
+        ModifyPlayer toModify = ModifyPlayer.builder()
+                .id(5)
+                .name("")
+                .isGuardian(false)
+                .build();
+
+        String errorMessage = "400 BAD_REQUEST : Name is mandatory";
+
+        assertThrowsServletExceptionMessage(errorMessage,
+                () ->  mockMvc
+                        .perform(put("/players")
+                                .content(objectMapper.writeValueAsString(List.of(toModify)))
+                                .contentType("application/json")
+                                .accept("application/json"))
+                        .andExpect(status().isBadRequest()));
+        assertThrowsServletExceptionMessage(errorMessage,
+                () ->  mockMvc
+                        .perform(put("/players")
+                                .content(objectMapper.writeValueAsString(List.of(toModify.toBuilder().name(null).build())))
+                                .contentType("application/json")
+                                .accept("application/json"))
+                        .andExpect(status().isBadRequest()));
+    }
+
+    @Test
+    void modify_players_id_null_ko() throws Exception {
+        ModifyPlayer toModify = ModifyPlayer.builder()
+                .id(null)
+                .name("J5modified")
+                .isGuardian(false)
+                .build();
+
+        String errorMessage = "400 BAD_REQUEST : Valid Player Id must be specified";
+
+        assertThrowsServletExceptionMessage(errorMessage,
+                () ->  mockMvc
+                        .perform(put("/players")
+                                .content(objectMapper.writeValueAsString(List.of(toModify)))
+                                .contentType("application/json")
+                                .accept("application/json"))
+                        .andExpect(status().isBadRequest()).andReturn().getResolvedException());
+    }
+
+    @Test
+    void modify_players_id_not_found_ko() throws Exception {
+        int id = 1000;
+        ModifyPlayer toModify = ModifyPlayer.builder()
+                .id(id)
+                .name("J5modified")
+                .isGuardian(false)
+                .build();
+
+        String errorMessage = "404 NOT_FOUND : Player#"+id+" not found";
+
+        assertThrowsServletExceptionMessage(errorMessage,
+                () ->  mockMvc
+                        .perform(put("/players")
+                                .content(objectMapper.writeValueAsString(List.of(toModify)))
+                                .contentType("application/json")
+                                .accept("application/json"))
+                        .andExpect(status().isNotFound()));
+    }
+
+
 
     private List<Player> convertFromHttpResponse(MockHttpServletResponse response)
             throws JsonProcessingException, UnsupportedEncodingException {
