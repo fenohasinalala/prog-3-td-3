@@ -121,7 +121,7 @@ class MatchIntegrationTest {
                         .content(objectMapper.writeValueAsString(List.of(scorer6().toBuilder()
                                 .scoreTime(-1)
                                 .build() )))
-                        .contentType("application/json")));
+                        .contentType("application/json").accept("application/json")));
 
     }
 

@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static utils.TestUtils.assertThrowsServletExceptionMessage;
 import static utils.TestUtils.scorer6;
 
@@ -68,7 +69,7 @@ class PlayerIntegrationTest {
         List<Player> actual = convertFromHttpResponse(response);
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertEquals(9, actual.size());
+        assertEquals(10, actual.size());
         assertTrue(actual.containsAll(List.of(
                 player1(),
                 player2(),
@@ -135,13 +136,15 @@ class PlayerIntegrationTest {
                         .perform(put("/players")
                                 .content(objectMapper.writeValueAsString(List.of(toModify)))
                                 .contentType("application/json")
-                                .accept("application/json")));
+                                .accept("application/json"))
+                        .andExpect(status().isBadRequest()));
         assertThrowsServletExceptionMessage(errorMessage,
                 () ->  mockMvc
                         .perform(put("/players")
                                 .content(objectMapper.writeValueAsString(List.of(toModify.toBuilder().name(null).build())))
                                 .contentType("application/json")
-                                .accept("application/json")));
+                                .accept("application/json"))
+                        .andExpect(status().isBadRequest()));
     }
 
     @Test
@@ -159,7 +162,8 @@ class PlayerIntegrationTest {
                         .perform(put("/players")
                                 .content(objectMapper.writeValueAsString(List.of(toModify)))
                                 .contentType("application/json")
-                                .accept("application/json")));
+                                .accept("application/json"))
+                        .andExpect(status().isBadRequest()).andReturn().getResolvedException());
     }
 
     @Test
@@ -178,7 +182,8 @@ class PlayerIntegrationTest {
                         .perform(put("/players")
                                 .content(objectMapper.writeValueAsString(List.of(toModify)))
                                 .contentType("application/json")
-                                .accept("application/json")));
+                                .accept("application/json"))
+                        .andExpect(status().isNotFound()));
     }
 
 
