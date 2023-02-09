@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static utils.TestUtils.assertThrowsApiException;
 import static utils.TestUtils.assertThrowsServletExceptionMessage;
 import static utils.TestUtils.scorer6;
 
@@ -69,10 +70,13 @@ class MatchIntegrationTest {
     void read_match_by_id_doesnt_exist_ko() throws Exception {
         String id = "1000";
 
-        assertThrowsServletExceptionMessage("404 NOT_FOUND : Match#"+id+" not found.",
-                () ->  mockMvc.perform(get("/matches/"+id))
-                        .andExpect(status().isNotFound()));
+        assertThrowsApiException("404 NOT_FOUND : Match#"+id+" not found.",
+                mockMvc.perform(get("/matches/"+id))
+                        .andExpect(status().isNotFound())
+                        .andReturn()
+                        .getResponse());
     }
+
 
     @Test
     void add_goals_ok() throws Exception {
@@ -99,43 +103,50 @@ class MatchIntegrationTest {
     void add_goals_of_goalkeeper_ko() throws Exception {
         String matchId = "3";
         String errorMessage = "400 BAD_REQUEST : Player#"+player6().getId()+" is a guardian so they cannot score.";
+            assertThrowsApiException(errorMessage,
+                   mockMvc.perform(post("/matches/"+matchId+"/goals")
+                           .content(objectMapper.writeValueAsString(List.of(
+                                   scorer6().toBuilder()
+                                   .player(player6().toBuilder()
+                                           .isGuardian(true)
+                                           .build())
+                                   .build() )))
+                           .contentType("application/json")).andExpect(status().isBadRequest())
+                           .andReturn()
+                           .getResponse());
 
-        assertThrowsServletExceptionMessage(errorMessage,
-                () ->  mockMvc.perform(post("/matches/"+matchId+"/goals")
-                        .content(objectMapper.writeValueAsString(List.of(scorer6().toBuilder()
-                                .player(player6().toBuilder()
-                                        .isGuardian(true)
-                                        .build())
-                                .build() )))
-                        .contentType("application/json")));
     }
 
 
     @Test
-    void add_goals_minute_inferior_to_zero_ko() throws Exception {
+    void add_goals_minute_inferior_to_zero_ko() throws Exception{
         String matchId = "3";
         String errorMessage = "400 BAD_REQUEST : Player#"+player6().getId()+" cannot score before before minute 0.";
 
-        assertThrowsServletExceptionMessage(errorMessage,
-                () ->  mockMvc.perform(post("/matches/"+matchId+"/goals")
+        assertThrowsApiException(errorMessage,
+                mockMvc.perform(post("/matches/"+matchId+"/goals")
                         .content(objectMapper.writeValueAsString(List.of(scorer6().toBuilder()
                                 .scoreTime(-1)
                                 .build() )))
-                        .contentType("application/json").accept("application/json")));
+                        .contentType("application/json").accept("application/json"))
+                        .andReturn()
+                        .getResponse());
 
     }
 
     @Test
-    void add_goals_minute_superior_to_ninety_ko() throws Exception {
+    void add_goals_minute_superior_to_ninety_ko() throws Exception{
         String matchId = "3";
         String errorMessage = "400 BAD_REQUEST : Player#"+player6().getName()+" cannot score before after minute 90.";
 
-        assertThrowsServletExceptionMessage(errorMessage,
-                () ->  mockMvc.perform(post("/matches/"+matchId+"/goals")
+        assertThrowsApiException(errorMessage,
+                mockMvc.perform(post("/matches/"+matchId+"/goals")
                         .content(objectMapper.writeValueAsString(List.of(scorer6().toBuilder()
                                 .scoreTime(91)
                                 .build() )))
-                        .contentType("application/json")));
+                        .contentType("application/json"))
+                        .andReturn()
+                        .getResponse());
     }
 
 
