@@ -9,10 +9,7 @@ import app.foot.controller.rest.TeamMatch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
-import lombok.extern.slf4j.Slf4j;
-import lombok.extern.slf4j.XSlf4j;
 import org.junit.jupiter.api.Test;
-import org.slf4j.ILoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,7 +28,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static utils.TestUtils.assertThrowsApiException;
-import static utils.TestUtils.assertThrowsServletExceptionMessage;
 import static utils.TestUtils.scorer6;
 
 @SpringBootTest(classes = FootApi.class)
@@ -58,7 +53,9 @@ class MatchIntegrationTest {
         assertEquals(3, actual.size());
         logger.info(actual.toString());
         logger.info(expectedMatch2().toString());
+        logger.info(expectedMatch3().toString());
         assertTrue(actual.contains(expectedMatch2()));
+        assertTrue(actual.contains(expectedMatch3()));
         //assertTrue(actual.containsAll(List.of(expectedMatch2())));
     }
 
