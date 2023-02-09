@@ -9,7 +9,10 @@ import app.foot.controller.rest.TeamMatch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import lombok.extern.slf4j.Slf4j;
+import lombok.extern.slf4j.XSlf4j;
 import org.junit.jupiter.api.Test;
+import org.slf4j.ILoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +23,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,6 +43,9 @@ class MatchIntegrationTest {
     private final ObjectMapper objectMapper = new ObjectMapper()
             .findAndRegisterModules();  //Allow 'java.time.Instant' mapping
 
+    Logger logger
+            = Logger.getLogger(
+            MatchIntegrationTest.class.getName());
     @Test
     void read_matches_ok() throws Exception {
         MockHttpServletResponse response = mockMvc
@@ -48,8 +56,10 @@ class MatchIntegrationTest {
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
         assertEquals(3, actual.size());
-        assertTrue(actual.containsAll(List.of(
-                expectedMatch2())));
+        logger.info(actual.toString());
+        logger.info(expectedMatch2().toString());
+        assertTrue(actual.contains(expectedMatch2()));
+        //assertTrue(actual.containsAll(List.of(expectedMatch2())));
     }
 
     @Test
