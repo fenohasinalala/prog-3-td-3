@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static utils.TestUtils.assertThrowsApiException;
 import static utils.TestUtils.assertThrowsServletExceptionMessage;
 import static utils.TestUtils.scorer6;
 
@@ -131,20 +132,18 @@ class PlayerIntegrationTest {
 
         String errorMessage = "400 BAD_REQUEST : Name is mandatory";
 
-        assertThrowsServletExceptionMessage(errorMessage,
-                () ->  mockMvc
-                        .perform(put("/players")
+        assertThrowsApiException(errorMessage,
+                mockMvc.perform(put("/players")
                                 .content(objectMapper.writeValueAsString(List.of(toModify)))
                                 .contentType("application/json")
                                 .accept("application/json"))
-                        .andExpect(status().isBadRequest()));
-        assertThrowsServletExceptionMessage(errorMessage,
-                () ->  mockMvc
-                        .perform(put("/players")
+                        .andExpect(status().isBadRequest()).andReturn().getResponse());
+        assertThrowsApiException(errorMessage,
+                mockMvc.perform(put("/players")
                                 .content(objectMapper.writeValueAsString(List.of(toModify.toBuilder().name(null).build())))
                                 .contentType("application/json")
                                 .accept("application/json"))
-                        .andExpect(status().isBadRequest()));
+                        .andExpect(status().isBadRequest()).andReturn().getResponse());
     }
 
     @Test
@@ -157,13 +156,12 @@ class PlayerIntegrationTest {
 
         String errorMessage = "400 BAD_REQUEST : Valid Player Id must be specified";
 
-        assertThrowsServletExceptionMessage(errorMessage,
-                () ->  mockMvc
-                        .perform(put("/players")
+        assertThrowsApiException(errorMessage,
+                mockMvc.perform(put("/players")
                                 .content(objectMapper.writeValueAsString(List.of(toModify)))
                                 .contentType("application/json")
                                 .accept("application/json"))
-                        .andExpect(status().isBadRequest()).andReturn().getResolvedException());
+                        .andExpect(status().isBadRequest()).andReturn().getResponse());
     }
 
     @Test
@@ -177,13 +175,12 @@ class PlayerIntegrationTest {
 
         String errorMessage = "404 NOT_FOUND : Player#"+id+" not found";
 
-        assertThrowsServletExceptionMessage(errorMessage,
-                () ->  mockMvc
-                        .perform(put("/players")
+        assertThrowsApiException(errorMessage,
+                mockMvc.perform(put("/players")
                                 .content(objectMapper.writeValueAsString(List.of(toModify)))
                                 .contentType("application/json")
                                 .accept("application/json"))
-                        .andExpect(status().isNotFound()));
+                        .andExpect(status().isNotFound()).andReturn().getResponse());
     }
 
 
